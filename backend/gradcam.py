@@ -137,8 +137,10 @@ def generate_gradcam(image_path, output_path=None, alpha=0.45):
         return None
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
+    from backend.model import IMG_SIZE
+
     preprocess = A.Compose([
-        A.Resize(224, 224),
+        A.Resize(IMG_SIZE, IMG_SIZE),
         A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ToTensorV2()
     ])
