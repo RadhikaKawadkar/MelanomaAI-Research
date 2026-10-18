@@ -27,7 +27,7 @@ MODEL_DIR  = "models"
 OUTPUT_DIR = "outputs"
 GRAPH_DIR  = os.path.join(OUTPUT_DIR, "graphs")
 BATCH_SIZE = 32
-IMG_SIZE   = 224
+IMG_SIZE   = int(os.environ.get("IMG_SIZE", 384))
 SEED       = 42
 CYAN="#00D4FF"; RED="#FF3B5C"; GREEN="#00E5A0"; WARN="#FFB800"
 ORG="#FF6400";  PUR="#818CF8"; BG="#0A101E";   BG2="#060D1A"
@@ -60,18 +60,33 @@ def build_model():
 def load_best_model(model_path=None):
     model = build_model()
     if model_path is None:
-        candidates = []
-        for d in [".", MODEL_DIR]:
-            for n in ["melanoma_final.pth","best_phase2.pth","best_phase1.pth"]:
-                p = os.path.join(d, n)
-                if os.path.exists(p): candidates.append((os.path.getsize(p), p))
-        if not candidates: raise FileNotFoundError("No model checkpoint found.")
-        candidates.sort(reverse=True)
-        model_path = candidates[0][1]
+        priority_names = ["melanoma_final.pth", "best_phase2.pth", "best_phase1.pth"]
+        selected = None
+        for name in priority_names:
+            for d in [MODEL_DIR, "."]:
+                candidate = os.path.join(d, name)
+                if os.path.exists(candidate) and os.path.isfile(candidate):
+                    selected = candidate
+                    break
+            if selected:
+                break
+        if not selected:
+            raise FileNotFoundError(
+                f"No model checkpoint found in {MODEL_DIR}/ or current directory. "
+                f"Searched priority list: {priority_names}."
+            )
+        model_path = selected
+
+    print(f"   Loading checkpoint: {model_path}")
     ck = torch.load(model_path, map_location=device)
-    model.load_state_dict(ck["model_state_dict"])
+    if isinstance(ck, dict) and "model_state_dict" in ck:
+        model.load_state_dict(ck["model_state_dict"])
+    elif isinstance(ck, dict) and "state_dict" in ck:
+        model.load_state_dict(ck["state_dict"])
+    else:
+        model.load_state_dict(ck)
     model = model.to(device).eval()
-    print(f"   Loaded: {model_path}")
+    print(f"   ✅ Successfully loaded: {model_path}")
     return model, model_path
 class SkinDataset(Dataset):
     def __init__(self, root, transform, indices):
