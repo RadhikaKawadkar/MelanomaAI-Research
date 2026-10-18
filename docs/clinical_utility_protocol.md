@@ -15,20 +15,36 @@
 
 ---
 
-## 2. Decision Threshold Range Justification
+## 2. Decision Threshold Range Justification & Critical Review
 
-In standard clinical practice, a dermatologist is willing to biopsy 10 to 20 benign lesions to detect one melanoma (Number Needed to Biopsy, $\text{NNB} \approx 10-20$).
+### Methodological Justification
+The decision threshold probability ($p_t$) represents the specific clinical cut-point where the expected utility of intervention (referral or biopsy) equals the expected utility of observation:
+$$p_t = \frac{\text{Harm}_{\text{FP}}}{\text{Benefit}_{\text{TP}} + \text{Harm}_{\text{FP}}} = \frac{1}{1 + \frac{\text{Benefit}_{\text{TP}}}{\text{Harm}_{\text{FP}}}}$$
 
-Using the decision-analytic relationship between threshold probability $p_t$ and cost-benefit ratio:
-$$p_t = \frac{\text{Harm of FP}}{\text{Benefit of TP} + \text{Harm of FP}}$$
+In melanoma detection, the harm of a False Negative (delayed diagnosis of invasive melanoma with risk of metastasis and mortality) far outweighs the harm of a False Positive (minor anxiety and a superficial diagnostic punch or shave biopsy). As a consequence, clinicians operate at low threshold probabilities ($p_t \ll 0.50$).
 
-- For $\text{NNB} = 20 \implies p_t \approx 0.05$ (5%)
-- For $\text{NNB} = 10 \implies p_t \approx 0.10$ (10%)
-- For $\text{NNB} = 5 \implies p_t \approx 0.17$ (17%)
-- Balanced / Intermediate threshold: $p_t \approx 0.25 - 0.35$
+### Stratification by Clinical Setting
+A single static range of 5%–35% is methodologically inadequate without distinguishing the clinical setting and user persona:
 
-**Standard Evaluated Threshold Range**:
-$$p_t \in [0.05, 0.35]$$
+1. **Setting A — Primary Care Screening & Triage (PCP to Specialist Referral)**:
+   - **User**: General practitioner / primary care physician.
+   - **Clinical Decision**: Routine reassurance vs. Urgent dermatology referral.
+   - **Cost/Harm Ratio**: Missing a melanoma is catastrophic; a referral carries low physical harm.
+   - **Justified Threshold Range**: **$p_t \in [0.02, 0.08]$** (corresponding to willingness to refer 12 to 50 benign lesions per detected melanoma).
+2. **Setting B — Secondary Care Dermatology (Excisional Biopsy Decision)**:
+   - **User**: Board-certified dermatologist with dermoscopy expertise.
+   - **Clinical Decision**: Clinical / digital monitoring vs. Surgical excision/biopsy.
+   - **Cost/Harm Ratio**: Dermatologist NNB benchmarks typically range from 5:1 to 15:1.
+   - **Justified Threshold Range**: **$p_t \in [0.08, 0.20]$** (corresponding to willingness to biopsy 5 to 12 benign lesions per melanoma).
+3. **Setting C — Cosmetic / High-Prevalence Sensitive Zone**:
+   - **User**: Specialist evaluating lesions in cosmetically sensitive areas (e.g., face) or multiple dysplastic nevi.
+   - **Justified Threshold Range**: **$p_t \in [0.20, 0.35]$** (higher threshold combined with short-term sequential digital dermoscopy monitoring).
+
+### Evidence Required to Finalize Operational Thresholds
+Before deploying or claiming clinical utility, the following empirical evidence must be established:
+1. **Intended Deployment Tier**: Explicitly declaring whether MelanomaAI operates as a primary care triage filter or a specialist biopsy aid.
+2. **Formal Harm Utility Assessment**: Clinical elicitation of the local harm ratio ($\text{Harm}_{\text{FP}} / \text{Benefit}_{\text{TP}}$) accounting for biopsy morbidity, scarring, and healthcare costs.
+3. **Multi-Threshold Sensitivity Analysis**: Evaluating Net Benefit across all three sub-ranges ($[0.02, 0.08]$, $[0.08, 0.20]$, $[0.20, 0.35]$) rather than relying on an unverified single bracket.
 
 ---
 

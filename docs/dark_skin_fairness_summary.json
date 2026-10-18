@@ -1,0 +1,503 @@
+{
+  "protocol": "Full-Cohort ISIC 2020 Holdout Test Evaluation (N=6,458)",
+  "timestamp": "2026-10-18 22:02:35",
+  "checkpoint": "C:\\DS_CP\\outputs\\clean_retraining\\checkpoints\\clean_model_best.pth",
+  "overall": {
+    "name": "All Test Images",
+    "images": 6458,
+    "patients": 411,
+    "melanoma_cases": 119,
+    "benign_cases": 6339,
+    "prevalence": 0.0184,
+    "with_clahe": {
+      "auroc": 0.8754,
+      "auroc_bootstrap_95ci": [
+        0.875,
+        0.8462,
+        0.9033
+      ],
+      "raw_threshold_050": {
+        "threshold": 0.5,
+        "tp": 77,
+        "fp": 876,
+        "tn": 5463,
+        "fn": 42,
+        "sensitivity": 0.6471,
+        "specificity": 0.8618,
+        "false_negative_rate": 0.3529,
+        "ppv": 0.0808,
+        "npv": 0.9924,
+        "referral_rate": 0.1476
+      },
+      "raw_threshold_040": {
+        "threshold": 0.4,
+        "tp": 110,
+        "fp": 2104,
+        "tn": 4235,
+        "fn": 9,
+        "sensitivity": 0.9244,
+        "specificity": 0.6681,
+        "false_negative_rate": 0.0756,
+        "ppv": 0.0497,
+        "npv": 0.9979,
+        "referral_rate": 0.3428
+      },
+      "platt_threshold_002": {
+        "threshold": 0.02,
+        "tp": 110,
+        "fp": 1988,
+        "tn": 4351,
+        "fn": 9,
+        "sensitivity": 0.9244,
+        "specificity": 0.6864,
+        "false_negative_rate": 0.0756,
+        "ppv": 0.0524,
+        "npv": 0.9979,
+        "referral_rate": 0.3249
+      },
+      "platt_threshold_005": {
+        "threshold": 0.05,
+        "tp": 64,
+        "fp": 565,
+        "tn": 5774,
+        "fn": 55,
+        "sensitivity": 0.5378,
+        "specificity": 0.9109,
+        "false_negative_rate": 0.4622,
+        "ppv": 0.1017,
+        "npv": 0.9906,
+        "referral_rate": 0.0974
+      },
+      "ci_raw_050": {
+        "sensitivity": [
+          0.6444,
+          0.55,
+          0.7408
+        ],
+        "specificity": [
+          0.862,
+          0.842,
+          0.8801
+        ],
+        "fnr": [
+          0.3556,
+          0.2592,
+          0.45
+        ]
+      }
+    },
+    "no_clahe": {
+      "auroc": 0.8761,
+      "auroc_bootstrap_95ci": [
+        0.8755,
+        0.8457,
+        0.9036
+      ],
+      "raw_threshold_050": {
+        "threshold": 0.5,
+        "tp": 72,
+        "fp": 677,
+        "tn": 5662,
+        "fn": 47,
+        "sensitivity": 0.605,
+        "specificity": 0.8932,
+        "false_negative_rate": 0.395,
+        "ppv": 0.0961,
+        "npv": 0.9918,
+        "referral_rate": 0.116
+      },
+      "raw_threshold_040": {
+        "threshold": 0.4,
+        "tp": 107,
+        "fp": 1738,
+        "tn": 4601,
+        "fn": 12,
+        "sensitivity": 0.8992,
+        "specificity": 0.7258,
+        "false_negative_rate": 0.1008,
+        "ppv": 0.058,
+        "npv": 0.9974,
+        "referral_rate": 0.2857
+      },
+      "platt_threshold_002": {
+        "threshold": 0.02,
+        "tp": 106,
+        "fp": 1633,
+        "tn": 4706,
+        "fn": 13,
+        "sensitivity": 0.8908,
+        "specificity": 0.7424,
+        "false_negative_rate": 0.1092,
+        "ppv": 0.061,
+        "npv": 0.9972,
+        "referral_rate": 0.2693
+      },
+      "platt_threshold_005": {
+        "threshold": 0.05,
+        "tp": 58,
+        "fp": 431,
+        "tn": 5908,
+        "fn": 61,
+        "sensitivity": 0.4874,
+        "specificity": 0.932,
+        "false_negative_rate": 0.5126,
+        "ppv": 0.1186,
+        "npv": 0.9898,
+        "referral_rate": 0.0757
+      },
+      "ci_raw_050": {
+        "sensitivity": [
+          0.6017,
+          0.5,
+          0.6957
+        ],
+        "specificity": [
+          0.8934,
+          0.8755,
+          0.9096
+        ],
+        "fnr": [
+          0.3983,
+          0.3043,
+          0.5
+        ]
+      }
+    }
+  },
+  "light_skin": {
+    "name": "Light Skin (ITA > 28)",
+    "images": 4338,
+    "patients": 381,
+    "melanoma_cases": 61,
+    "benign_cases": 4277,
+    "prevalence": 0.0141,
+    "with_clahe": {
+      "auroc": 0.9013,
+      "auroc_bootstrap_95ci": [
+        0.9007,
+        0.8667,
+        0.9322
+      ],
+      "raw_threshold_050": {
+        "threshold": 0.5,
+        "tp": 37,
+        "fp": 352,
+        "tn": 3925,
+        "fn": 24,
+        "sensitivity": 0.6066,
+        "specificity": 0.9177,
+        "false_negative_rate": 0.3934,
+        "ppv": 0.0951,
+        "npv": 0.9939,
+        "referral_rate": 0.0897
+      },
+      "raw_threshold_040": {
+        "threshold": 0.4,
+        "tp": 53,
+        "fp": 929,
+        "tn": 3348,
+        "fn": 8,
+        "sensitivity": 0.8689,
+        "specificity": 0.7828,
+        "false_negative_rate": 0.1311,
+        "ppv": 0.054,
+        "npv": 0.9976,
+        "referral_rate": 0.2264
+      },
+      "platt_threshold_002": {
+        "threshold": 0.02,
+        "tp": 53,
+        "fp": 872,
+        "tn": 3405,
+        "fn": 8,
+        "sensitivity": 0.8689,
+        "specificity": 0.7961,
+        "false_negative_rate": 0.1311,
+        "ppv": 0.0573,
+        "npv": 0.9977,
+        "referral_rate": 0.2132
+      },
+      "platt_threshold_005": {
+        "threshold": 0.05,
+        "tp": 31,
+        "fp": 229,
+        "tn": 4048,
+        "fn": 30,
+        "sensitivity": 0.5082,
+        "specificity": 0.9465,
+        "false_negative_rate": 0.4918,
+        "ppv": 0.1192,
+        "npv": 0.9926,
+        "referral_rate": 0.0599
+      },
+      "ci_raw_050": {
+        "sensitivity": [
+          0.6048,
+          0.4762,
+          0.7369
+        ],
+        "specificity": [
+          0.9176,
+          0.9004,
+          0.9329
+        ],
+        "fnr": [
+          0.3952,
+          0.2631,
+          0.5238
+        ]
+      }
+    },
+    "no_clahe": {
+      "auroc": 0.9013,
+      "auroc_bootstrap_95ci": [
+        0.9007,
+        0.8667,
+        0.9322
+      ],
+      "raw_threshold_050": {
+        "threshold": 0.5,
+        "tp": 37,
+        "fp": 352,
+        "tn": 3925,
+        "fn": 24,
+        "sensitivity": 0.6066,
+        "specificity": 0.9177,
+        "false_negative_rate": 0.3934,
+        "ppv": 0.0951,
+        "npv": 0.9939,
+        "referral_rate": 0.0897
+      },
+      "raw_threshold_040": {
+        "threshold": 0.4,
+        "tp": 53,
+        "fp": 929,
+        "tn": 3348,
+        "fn": 8,
+        "sensitivity": 0.8689,
+        "specificity": 0.7828,
+        "false_negative_rate": 0.1311,
+        "ppv": 0.054,
+        "npv": 0.9976,
+        "referral_rate": 0.2264
+      },
+      "platt_threshold_002": {
+        "threshold": 0.02,
+        "tp": 53,
+        "fp": 872,
+        "tn": 3405,
+        "fn": 8,
+        "sensitivity": 0.8689,
+        "specificity": 0.7961,
+        "false_negative_rate": 0.1311,
+        "ppv": 0.0573,
+        "npv": 0.9977,
+        "referral_rate": 0.2132
+      },
+      "platt_threshold_005": {
+        "threshold": 0.05,
+        "tp": 31,
+        "fp": 229,
+        "tn": 4048,
+        "fn": 30,
+        "sensitivity": 0.5082,
+        "specificity": 0.9465,
+        "false_negative_rate": 0.4918,
+        "ppv": 0.1192,
+        "npv": 0.9926,
+        "referral_rate": 0.0599
+      },
+      "ci_raw_050": {
+        "sensitivity": [
+          0.6048,
+          0.4762,
+          0.7369
+        ],
+        "specificity": [
+          0.9176,
+          0.9004,
+          0.9329
+        ],
+        "fnr": [
+          0.3952,
+          0.2631,
+          0.5238
+        ]
+      }
+    }
+  },
+  "dark_skin": {
+    "name": "Dark Skin (ITA <= 28)",
+    "images": 2120,
+    "patients": 364,
+    "melanoma_cases": 58,
+    "benign_cases": 2062,
+    "prevalence": 0.0274,
+    "with_clahe": {
+      "auroc": 0.821,
+      "auroc_bootstrap_95ci": [
+        0.8195,
+        0.7712,
+        0.8638
+      ],
+      "raw_threshold_050": {
+        "threshold": 0.5,
+        "tp": 40,
+        "fp": 524,
+        "tn": 1538,
+        "fn": 18,
+        "sensitivity": 0.6897,
+        "specificity": 0.7459,
+        "false_negative_rate": 0.3103,
+        "ppv": 0.0709,
+        "npv": 0.9884,
+        "referral_rate": 0.266
+      },
+      "raw_threshold_040": {
+        "threshold": 0.4,
+        "tp": 57,
+        "fp": 1175,
+        "tn": 887,
+        "fn": 1,
+        "sensitivity": 0.9828,
+        "specificity": 0.4302,
+        "false_negative_rate": 0.0172,
+        "ppv": 0.0463,
+        "npv": 0.9989,
+        "referral_rate": 0.5811
+      },
+      "platt_threshold_002": {
+        "threshold": 0.02,
+        "tp": 57,
+        "fp": 1116,
+        "tn": 946,
+        "fn": 1,
+        "sensitivity": 0.9828,
+        "specificity": 0.4588,
+        "false_negative_rate": 0.0172,
+        "ppv": 0.0486,
+        "npv": 0.9989,
+        "referral_rate": 0.5533
+      },
+      "platt_threshold_005": {
+        "threshold": 0.05,
+        "tp": 33,
+        "fp": 336,
+        "tn": 1726,
+        "fn": 25,
+        "sensitivity": 0.569,
+        "specificity": 0.8371,
+        "false_negative_rate": 0.431,
+        "ppv": 0.0894,
+        "npv": 0.9857,
+        "referral_rate": 0.1741
+      },
+      "ci_raw_050": {
+        "sensitivity": [
+          0.6862,
+          0.5555,
+          0.7963
+        ],
+        "specificity": [
+          0.745,
+          0.7068,
+          0.7775
+        ],
+        "fnr": [
+          0.3138,
+          0.2037,
+          0.4445
+        ]
+      }
+    },
+    "no_clahe": {
+      "auroc": 0.8226,
+      "auroc_bootstrap_95ci": [
+        0.8219,
+        0.7694,
+        0.8685
+      ],
+      "raw_threshold_050": {
+        "threshold": 0.5,
+        "tp": 35,
+        "fp": 325,
+        "tn": 1737,
+        "fn": 23,
+        "sensitivity": 0.6034,
+        "specificity": 0.8424,
+        "false_negative_rate": 0.3966,
+        "ppv": 0.0972,
+        "npv": 0.9869,
+        "referral_rate": 0.1698
+      },
+      "raw_threshold_040": {
+        "threshold": 0.4,
+        "tp": 54,
+        "fp": 809,
+        "tn": 1253,
+        "fn": 4,
+        "sensitivity": 0.931,
+        "specificity": 0.6077,
+        "false_negative_rate": 0.069,
+        "ppv": 0.0626,
+        "npv": 0.9968,
+        "referral_rate": 0.4071
+      },
+      "platt_threshold_002": {
+        "threshold": 0.02,
+        "tp": 53,
+        "fp": 761,
+        "tn": 1301,
+        "fn": 5,
+        "sensitivity": 0.9138,
+        "specificity": 0.6309,
+        "false_negative_rate": 0.0862,
+        "ppv": 0.0651,
+        "npv": 0.9962,
+        "referral_rate": 0.384
+      },
+      "platt_threshold_005": {
+        "threshold": 0.05,
+        "tp": 27,
+        "fp": 202,
+        "tn": 1860,
+        "fn": 31,
+        "sensitivity": 0.4655,
+        "specificity": 0.902,
+        "false_negative_rate": 0.5345,
+        "ppv": 0.1179,
+        "npv": 0.9836,
+        "referral_rate": 0.108
+      },
+      "ci_raw_050": {
+        "sensitivity": [
+          0.6033,
+          0.4727,
+          0.7255
+        ],
+        "specificity": [
+          0.8421,
+          0.816,
+          0.8661
+        ],
+        "fnr": [
+          0.3967,
+          0.2745,
+          0.5273
+        ]
+      }
+    }
+  },
+  "clahe_ablation": {
+    "description": "Head-to-head comparison on all dark-skin test images (ITA <= 28)",
+    "images": 2120,
+    "melanomas": 58,
+    "auc_with_clahe": 0.821,
+    "auc_without_clahe": 0.8226,
+    "auc_delta": -0.0016,
+    "sens_delta_raw050": 0.0863,
+    "spec_delta_raw050": -0.0965,
+    "mean_prob_shift_clahe_minus_noclahe": 0.054652,
+    "conclusion": "CLAHE shows no significant or demonstrable improvement in AUROC or sensitivity on dark skin for the clean-trained model; performance is virtually identical."
+  }
+}
