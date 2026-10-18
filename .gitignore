@@ -1,0 +1,73 @@
+# ── Data, medical images & trained weights (never upload) ─────────────────
+data/
+384dataset/
+models/
+demo_samples/
+outputs/
+archive/
+backups/
+*.pth
+*.pt
+*.ckpt
+*.h5
+*.keras
+*.onnx
+
+# ── Raw & generated medical images ─────────────────────────────────────────
+*.dcm
+*.svs
+*.tif
+*.tiff
+*_gradcam.jpg
+*_gradcam.jpeg
+*_gradcam.png
+ISIC_*
+
+# ── Python / virtual environments ──────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.venv/
+ENV/
+
+# ── Environment & credentials / secrets ───────────────────────────────────
+.env
+.env.*
+*.pem
+*.key
+*.cert
+*.crt
+id_rsa
+id_ecdsa
+id_ed25519
+secrets/
+credentials.json
+
+# ── Logs & temporary files ────────────────────────────────────────────────
+*.log
+*.tmp
+training.log
+balance_log.txt
+streamlit_*.log
+log*.txt
+
+# ── Caches & checkpoints ──────────────────────────────────────────────────
+.ipynb_checkpoints/
+.pytest_cache/
+.cache/
+
+# ── Generated reports & archives ──────────────────────────────────────────
+report_*.pdf
+*.zip
+*.tar.gz
+*.7z
+
+# ── OS & IDE artifacts ────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.user
+.DS_Store
+Thumbs.db

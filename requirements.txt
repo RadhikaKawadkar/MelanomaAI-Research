@@ -1,0 +1,15 @@
+# MelanomaAI v2 — production runtime (install: pip install -r requirements.txt)
+# For GPU: install PyTorch with CUDA from https://pytorch.org first, then remaining packages.
+
+streamlit>=1.54.0
+torch>=2.5.0
+torchvision>=0.20.0
+opencv-python-headless>=4.9.0
+albumentations>=2.0.0
+Pillow>=10.0.0
+numpy>=2.0.0
+matplotlib>=3.8.0
+scikit-learn>=1.4.0
+tqdm>=4.66.0
+pandas>=2.0.0
+reportlab>=4.0.0

@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+{% block title %}MelanomaAI — Skin Cancer Detection{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════════════════════════════════
+     TAB 1: DIAGNOSIS
+═══════════════════════════════════════ -->
+<div class="tab-page active" id="tab-diagnosis">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Diagnosis</h1>
+      <p class="page-sub">Upload a dermoscopic image for AI-powered melanoma analysis</p>
+    </div>
+  </div>
+
+  <div class="diag-layout">
+
+    <!-- Upload Panel -->
+    <div class="upload-panel">
+
+      <div class="upload-card" id="upload-card">
+        <div class="upload-zone" id="upload-zone"
+             ondragover="event.preventDefault(); this.classList.add('dz-hover')"
+             ondragleave="this.classList.remove('dz-hover')"
+             ondrop="handleDrop(event)">
+          <div class="dz-content">
+            <div class="dz-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+              </svg>
+            </div>
+            <div class="dz-title">Drop image here</div>
+            <div class="dz-sub">JPG · JPEG · PNG</div>
+            <button class="btn btn-outline dz-btn" onclick="document.getElementById('file-input').click()">
+              Browse Files
+            </button>
+          </div>
+          <input type="file" id="file-input" accept=".jpg,.jpeg,.png" style="display:none" onchange="handleFileSelect(event)">
+        </div>
+      </div>
+
+      <!-- Preview (hidden until image loaded) -->
+      <div class="preview-card" id="preview-card" style="display:none">
+        <div class="preview-img-wrap" id="preview-img-wrap">
+          <img id="preview-img" src="" alt="Preview">
+          <div class="preview-badge" id="preview-badge"></div>
+          <button class="preview-clear-btn" onclick="resetDiagnosis()" title="Remove">✕</button>
+        </div>
+        <div class="preview-meta" id="preview-meta"></div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="upload-actions">
+        <button class="btn btn-primary btn-full" id="analyze-btn" onclick="runAnalysis()" disabled>
+          <span class="btn-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+          </span>
+          <span id="analyze-label">Analyze Image</span>
+          <div class="btn-spinner" id="btn-spinner"></div>
+        </button>
+        <button class="btn btn-ghost btn-full" onclick="loadDemo()">Load Demo Image</button>
+      </div>
+
+      <!-- Disclaimer -->
+      <div class="disclaimer-box">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span>For research and educational use only. Not a substitute for professional medical diagnosis.</span>
+      </div>
+
+    </div><!-- /upload-panel -->
+
+    <!-- Results Panel -->
+    <div class="results-panel" id="results-panel">
+
+      <!-- Empty state -->
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+            <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+        </div>
+        <div class="empty-title">No Analysis Yet</div>
+        <div class="empty-sub">Upload a dermoscopic image and click Analyze</div>
+      </div>
+
+      <!-- Results (populated by JS) -->
+      <div id="result-cards" style="display:none">
+
+        <!-- Verdict -->
+        <div class="result-card verdict-card" id="verdict-card">
+          <div class="verdict-header">
+            <div>
+              <div class="verdict-eyebrow">Classification Result</div>
+              <div class="verdict-label" id="verdict-label">—</div>
+            </div>
+            <div class="verdict-right">
+              <div class="verdict-prob-big" id="verdict-prob">—</div>
+              <div class="verdict-prob-sub">malignant probability</div>
+            </div>
+          </div>
+          <div class="verdict-risk-row">
+            <div class="risk-track">
+              <div class="risk-fill" id="risk-fill"></div>
+              <div class="risk-marker" id="risk-marker"></div>
+            </div>
+            <div class="risk-ends">
+              <span>0</span><span id="risk-score-val" class="risk-score-num">—</span><span>100</span>
+            </div>
+          </div>
+          <div class="verdict-tags">
+            <span class="risk-tag" id="risk-tag">—</span>
+            <span class="tone-tag" id="tone-tag">—</span>
+            <span class="clahe-tag" id="clahe-tag">—</span>
+          </div>
+        </div>
+
+        <!-- Action -->
+        <div class="action-card" id="action-card">
+          <div class="action-icon-wrap" id="action-icon-wrap"></div>
+          <div class="action-body">
+            <div class="action-title" id="action-title">—</div>
+            <div class="action-desc" id="action-desc">—</div>
+          </div>
+        </div>
+
+        <!-- ABCD + Skin side by side -->
+        <div class="two-panel">
+
+          <!-- ABCD -->
+          <div class="result-card">
+            <div class="rc-title">ABCD Biomarkers</div>
+            <div class="rc-sub">Dermoscopic feature analysis</div>
+            <div class="abcd-list" id="abcd-list"></div>
+          </div>
+
+          <!-- Skin tone -->
+          <div class="result-card">
+            <div class="rc-title">Skin Tone Analysis</div>
+            <div class="rc-sub">ITA-based Fitzpatrick classification</div>
+            <div class="skin-display" id="skin-display"></div>
+          </div>
+
+        </div>
+
+        <!-- Grad-CAM -->
+        <div class="result-card">
+          <div class="rc-title">Grad-CAM Attention Map</div>
+          <div class="rc-sub">Regions the model focused on — red = high activation</div>
+          <div class="gradcam-pair" id="gradcam-pair"></div>
+        </div>
+
+        <!-- Report button -->
+        <button class="btn btn-navy btn-full" onclick="downloadReport()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+          </svg>
+          Download PDF Report
+        </button>
+
+      </div><!-- /result-cards -->
+    </div><!-- /results-panel -->
+  </div><!-- /diag-layout -->
+</div>
+
+<!-- ═══════════════════════════════════════
+     TAB 2: EVALUATION
+═══════════════════════════════════════ -->
+<div class="tab-page" id="tab-evaluation">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Model Evaluation</h1>
+      <p class="page-sub">EfficientNetB3 performance metrics on test dataset</p>
+    </div>
+    <button class="btn btn-outline" onclick="loadMetrics()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+      Refresh Metrics
+    </button>
+  </div>
+
+  <!-- KPI row -->
+  <div class="kpi-row" id="kpi-row">
+    <div class="kpi-card kpi-loading"><div class="kpi-skeleton"></div></div>
+    <div class="kpi-card kpi-loading"><div class="kpi-skeleton"></div></div>
+    <div class="kpi-card kpi-loading"><div class="kpi-skeleton"></div></div>
+    <div class="kpi-card kpi-loading"><div class="kpi-skeleton"></div></div>
+  </div>
+
+  <!-- Charts grid -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Confusion Matrix</div>
+      <div class="chart-sub">Predicted vs Actual · threshold 0.50</div>
+      <canvas id="c-cm" height="240"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">ROC Curve</div>
+      <div class="chart-sub" id="roc-sub">AUC = loading…</div>
+      <canvas id="c-roc" height="240"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Precision-Recall</div>
+      <div class="chart-sub">Average Precision across thresholds</div>
+      <canvas id="c-pr" height="240"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Threshold Analysis</div>
+      <div class="chart-sub">Sensitivity vs Specificity</div>
+      <canvas id="c-thresh" height="240"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Risk Distribution</div>
+      <div class="chart-sub">Cases per risk level</div>
+      <canvas id="c-risk" height="240"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Probability Histogram</div>
+      <div class="chart-sub">Distribution of predicted probabilities</div>
+      <canvas id="c-hist" height="240"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Metrics Radar</div>
+      <div class="chart-sub">Multi-metric overview</div>
+      <canvas id="c-radar" height="240"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Fairness Analysis</div>
+      <div class="chart-sub">Accuracy by skin tone (Fitzpatrick)</div>
+      <canvas id="c-fair" height="240"></canvas>
+    </div>
+  </div>
+
+  <!-- Fairness summary -->
+  <div class="fairness-summary" id="fairness-summary">
+    <div class="fs-header">
+      <div class="fs-title">Skin Tone Equity Report</div>
+      <div class="fs-sub">CLAHE-based robustness layer performance</div>
+    </div>
+    <div class="fs-metrics" id="fs-metrics"></div>
+    <div class="fs-explain">
+      <strong>How CLAHE fixes the gap:</strong> Contrast Limited Adaptive Histogram Equalization is automatically applied to darker skin tones (Fitzpatrick IV–VI) based on ITA angle estimation. This adaptive preprocessing improves lesion visibility in melanin-rich skin, closing the accuracy gap between light and dark skin populations.
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════
+     TAB 3: HISTORY
+═══════════════════════════════════════ -->
+<div class="tab-page" id="tab-history">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Session History</h1>
+      <p class="page-sub">All scans performed in this browser session</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" onclick="exportCSV()">Export CSV</button>
+      <button class="btn btn-ghost btn-danger" onclick="clearHistory()">Clear History</button>
+    </div>
+  </div>
+
+  <!-- Session KPIs -->
+  <div class="session-kpi" id="session-kpi">
+    <div class="skpi-card">
+      <div class="skpi-val" id="sk-total">0</div>
+      <div class="skpi-label">Total Scans</div>
+    </div>
+    <div class="skpi-card">
+      <div class="skpi-val red" id="sk-mal">0</div>
+      <div class="skpi-label">Malignant</div>
+    </div>
+    <div class="skpi-card">
+      <div class="skpi-val green" id="sk-ben">0</div>
+      <div class="skpi-label">Benign</div>
+    </div>
+    <div class="skpi-card">
+      <div class="skpi-val mint" id="sk-avg">—</div>
+      <div class="skpi-label">Avg Probability</div>
+    </div>
+    <div class="skpi-card">
+      <div class="skpi-val amber" id="sk-high">0</div>
+      <div class="skpi-label">High Risk</div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table class="history-table" id="history-table">
+      <thead>
+        <tr>
+          <th onclick="sortTable('name')">#&nbsp; Image <span class="sort-arrow">↕</span></th>
+          <th onclick="sortTable('verdict')">Verdict <span class="sort-arrow">↕</span></th>
+          <th onclick="sortTable('prob_raw')">Probability <span class="sort-arrow">↕</span></th>
+          <th onclick="sortTable('risk')">Risk Level <span class="sort-arrow">↕</span></th>
+          <th onclick="sortTable('score')">Risk Score <span class="sort-arrow">↕</span></th>
+          <th onclick="sortTable('tone')">Skin Tone <span class="sort-arrow">↕</span></th>
+          <th onclick="sortTable('time')">Time <span class="sort-arrow">↕</span></th>
+        </tr>
+      </thead>
+      <tbody id="history-tbody">
+        <tr><td colspan="7" class="table-empty">No scans yet — run a diagnosis to see results here</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Risk score bar chart -->
+  <div class="chart-card" style="margin-top:20px">
+    <div class="chart-title">Risk Score Timeline</div>
+    <div class="chart-sub">Risk score per scan, colored by level</div>
+    <canvas id="c-history" height="160" style="width:100%;display:block;"></canvas>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/diagnosis.js') }}"></script>
+<script src="{{ url_for('static', filename='js/history.js') }}"></script>
+<script>
+  // Boot
+  document.addEventListener('DOMContentLoaded', () => {
+    loadSidebarMetrics();
+    loadHistory();
+  });
+</script>
+{% endblock %}
