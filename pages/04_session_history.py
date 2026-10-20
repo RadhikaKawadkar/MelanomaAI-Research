@@ -48,7 +48,7 @@ if hist:
     st.markdown("---")
     b1, b2, b3 = st.columns(3)
     with b1:
-        if st.button("🗑️ Clear history", use_container_width=True):
+        if st.button("🗑️ Clear history", width="stretch"):
             st.session_state.history = []
             st.session_state.analysis_done = False
             st.rerun()
@@ -59,10 +59,10 @@ if hist:
             csv_data,
             file_name=f"melanomaai_session_{int(time.time())}.csv",
             mime="text/csv",
-            use_container_width=True,
+            width="stretch",
         )
     with b3:
-        if hist and st.button("📄 Export last case PDF", use_container_width=True):
+        if hist and st.button("📄 Export last case PDF", width="stretch"):
             last = hist[-1]
             tmp = last.get("tmp_path")
             if tmp:
@@ -82,7 +82,7 @@ if hist:
                             f,
                             file_name=out_pdf,
                             mime="application/pdf",
-                            use_container_width=True,
+                            width="stretch",
                         )
                 else:
                     st.error("PDF generation failed")

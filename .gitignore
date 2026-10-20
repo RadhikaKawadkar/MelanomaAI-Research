@@ -48,6 +48,7 @@ credentials.json
 # ── Logs & temporary files ────────────────────────────────────────────────
 *.log
 *.tmp
+*.bak
 training.log
 balance_log.txt
 streamlit_*.log

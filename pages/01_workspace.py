@@ -46,10 +46,10 @@ with col_up:
             '<div style="border-radius:12px;overflow:hidden;border:1px solid rgba(76,215,246,0.2);margin-top:12px">',
             unsafe_allow_html=True,
         )
-        st.image(img, use_container_width=True)
+        st.image(img, width="stretch")
         st.markdown("</div>", unsafe_allow_html=True)
         st.caption(f"{img.width}×{img.height}px · {display_name}")
-        run_btn = st.button("🔬 Run Diagnostic Analysis", type="primary", use_container_width=True)
+        run_btn = st.button("🔬 Run Diagnostic Analysis", type="primary", width="stretch")
     else:
         st.markdown(
             """
@@ -136,7 +136,7 @@ if st.session_state.get("analysis_done") and st.session_state.get("last_tmp"):
     )
     exp1, exp2, exp3 = st.columns(3)
     with exp1:
-        if st.button("📄 Export PDF Report", use_container_width=True):
+        if st.button("📄 Export PDF Report", width="stretch"):
             out_pdf = f"report_{int(time.time())}.pdf"
             res = {
                 "probability": st.session_state.get("last_prob"),
@@ -155,7 +155,7 @@ if st.session_state.get("analysis_done") and st.session_state.get("last_tmp"):
                         f,
                         file_name=out_pdf,
                         mime="application/pdf",
-                        use_container_width=True,
+                        width="stretch",
                     )
             else:
                 st.error("Failed to create PDF")

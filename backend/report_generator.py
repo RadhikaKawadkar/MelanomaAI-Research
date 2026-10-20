@@ -443,10 +443,25 @@ def generate_report(result: dict) -> str:
 
         # SECTION 7 — MODEL PERFORMANCE
         story.append(Paragraph("Model Performance", h2_style))
+        try:
+            from backend.metrics import load_metrics
+            m = load_metrics() or {}
+        except Exception:
+            m = {}
+
+        def _fmt(val, is_pct=True):
+            if val is None:
+                return "N/A"
+            v = float(val)
+            if is_pct:
+                return f"{v * 100:.2f}%" if v <= 1.0 else f"{v:.2f}%"
+            return f"{v:.4f}"
+
+        auc_v = m.get("auc_roc") if m.get("auc_roc") is not None else m.get("roc_auc")
         perf_rows = [
-            ["Accuracy", "92.80%", "AUC-ROC", "0.9770"],
-            ["Sensitivity", "79.51%", "Specificity", "97.38%"],
-            ["F1 Score", "0.8498", "Precision", "91.27%"],
+            ["Accuracy", _fmt(m.get("accuracy")), "AUC-ROC", _fmt(auc_v, is_pct=False)],
+            ["Sensitivity", _fmt(m.get("sensitivity")), "Specificity", _fmt(m.get("specificity"))],
+            ["F1 Score", _fmt(m.get("f1_score"), is_pct=False), "Precision", _fmt(m.get("precision"))],
         ]
         perf = Table(perf_rows, colWidths=[1.4 * inch, 1.6 * inch, 1.4 * inch, 1.6 * inch])
         perf.setStyle(
@@ -465,9 +480,10 @@ def generate_report(result: dict) -> str:
             )
         )
         story.append(perf)
-        story.append(Paragraph("Training: 20,000 images (HAM10000 + ISIC 2020)", body_style))
+        eval_ds = m.get("evaluation_dataset", "ISIC 2020 Patient-Stratified Holdout")
+        story.append(Paragraph(f"Evaluation: {eval_ds} · Clean Model (leak-free)", body_style))
         story.append(
-            Paragraph("Fairness: CLAHE reduces dark skin gap by 33.1%", body_style)
+            Paragraph("Robustness: ITA-based skin routing with CLAHE for dark skin tones", body_style)
         )
         story.append(Spacer(1, 16))
 

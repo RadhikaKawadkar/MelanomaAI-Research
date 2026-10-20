@@ -72,7 +72,15 @@ def build_model():
     return base
 
 
-def load_model():
+_CACHED_MODEL = None
+_CACHED_MODEL_PATH = None
+
+
+def load_model(cached: bool = True):
+    global _CACHED_MODEL, _CACHED_MODEL_PATH
+    if cached and _CACHED_MODEL is not None and _CACHED_MODEL_PATH is not None:
+        return _CACHED_MODEL, _CACHED_MODEL_PATH
+
     model = build_model()
     candidate_files = [
         # 1. Clean retrained checkpoint (ISIC 2020 patient-stratified)
@@ -101,7 +109,12 @@ def load_model():
                     model.load_state_dict(ck)
                 else:
                     model.load_state_dict(ck)
-                return model.to(DEVICE).eval(), p
+                eval_model = model.to(DEVICE).eval()
+                resolved_path = os.path.normpath(os.path.abspath(p))
+                if cached:
+                    _CACHED_MODEL = eval_model
+                    _CACHED_MODEL_PATH = resolved_path
+                return eval_model, resolved_path
             except Exception:
                 continue
     return None, None
@@ -118,7 +131,7 @@ def predict(model, img_arr, threshold=0.5, use_robustness=True,
         tone_lbl, tone_col, _, reliability = get_skin_tone(ita)
         clahe_used = False
     tensor = val_tf(image=processed)["image"].unsqueeze(0).to(DEVICE)
-    with torch.no_grad():
+    with torch.inference_mode():
         prob_raw = float(model(tensor).squeeze().cpu())
     
     prob_calibrated = calibrate_probability(prob_raw, a=calib_a, b=calib_b)
@@ -144,8 +157,13 @@ def predict(model, img_arr, threshold=0.5, use_robustness=True,
 
 
 def predict_image(img_path, threshold=0.5, use_robustness=True,
-                  use_calibration=False, calib_a=PLATT_COEFF_A, calib_b=PLATT_COEFF_B):
-    model, path = load_model()
+                  use_calibration=False, calib_a=PLATT_COEFF_A, calib_b=PLATT_COEFF_B,
+                  model=None):
+    path = None
+    if model is None:
+        model, path = load_model()
+    else:
+        path = _CACHED_MODEL_PATH
     if model is None:
         raise FileNotFoundError('Model checkpoint not found. Ensure clean_model_best.pth or models/melanoma_final.pth exists.')
     img = cv2.imread(img_path)

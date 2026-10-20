@@ -75,12 +75,13 @@ TONE_TABLE = [
 ]
 
 DEFAULT_METRICS = {
-    "accuracy": 92.80,
-    "auc_roc": 0.9770,
-    "sensitivity": 79.51,
-    "specificity": 97.38,
-    "f1_score": 0.8498,
-    "precision": 91.27,
+    "accuracy": 0.8579,
+    "auc_roc": 0.8754,
+    "roc_auc": 0.8754,
+    "sensitivity": 0.6471,
+    "specificity": 0.8618,
+    "f1_score": 0.1437,
+    "precision": 0.0808,
 }
 
 V1_METRICS = {
@@ -134,6 +135,14 @@ def get_default_threshold() -> float:
 
 @st.cache_data(show_spinner=False)
 def get_metrics() -> dict:
+    try:
+        from backend.metrics import load_metrics
+        m = load_metrics()
+        if m:
+            return m
+    except Exception:
+        pass
+
     for p in (
         "outputs/metrics.json",
         "outputs/metrics_run8.json",
@@ -362,7 +371,7 @@ def render_demo_quick_load() -> None:
             if st.button(
                 f"{meta['icon']} {meta['title']}",
                 key=f"demo_load_{key}",
-                use_container_width=True,
+                width="stretch",
                 help=meta["hint"],
             ):
                 path = get_demo_path(key)
@@ -656,11 +665,11 @@ def render_gradcam_section(img, tmp_path: str) -> str | None:
     c1, c2, c3 = st.columns([1, 1, 1])
     with c1:
         st.markdown('<div class="gcam-card">', unsafe_allow_html=True)
-        st.image(img, use_container_width=True)
+        st.image(img, width="stretch")
         st.markdown('<div class="gcam-cap">Original dermoscopy<span>Input image before overlay</span></div></div>', unsafe_allow_html=True)
     with c2:
         st.markdown('<div class="gcam-card">', unsafe_allow_html=True)
-        st.image(gcam_pil, use_container_width=True)
+        st.image(gcam_pil, width="stretch")
         st.markdown('<div class="gcam-cap">Grad-CAM overlay<span>Attention heatmap blended on lesion</span></div></div>', unsafe_allow_html=True)
     with c3:
         st.markdown(

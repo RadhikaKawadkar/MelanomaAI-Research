@@ -170,7 +170,8 @@ def run(args: argparse.Namespace) -> int:
     tone = result.get("tone", "Unknown")
 
     metrics = load_metrics() or {}
-    auc = metrics.get("auc_roc", 0.9770)
+    auc = metrics.get("auc_roc") if metrics.get("auc_roc") is not None else metrics.get("roc_auc")
+    auc_str = f"{float(auc):.4f}" if auc is not None else "N/A"
     gpu = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "CPU"
 
     verdict_color = RED if verdict == "MALIGNANT" else GREEN
@@ -183,7 +184,15 @@ def run(args: argparse.Namespace) -> int:
     if patient_name:
         row("Patient:", patient_name)
     row("Image:", image_path.name)
-    row("Model:", f"EfficientNetB3 | AUC {float(auc):.4f}")
+    row("Model:", f"EfficientNetB3 | AUC {auc_str}")
+    model_path = result.get("model_path")
+    if model_path:
+        ckpt_path = Path(model_path)
+        try:
+            ckpt_display = str(ckpt_path.relative_to(ROOT))
+        except ValueError:
+            ckpt_display = ckpt_path.name
+        row("Checkpoint:", ckpt_display)
 
     section("PREDICTION")
     row("VERDICT:", verdict, verdict_color)
@@ -240,7 +249,7 @@ def run(args: argparse.Namespace) -> int:
 
     section("SYSTEM METRICS")
     row("Accuracy:", fmt_pct(metrics.get("accuracy")))
-    row("AUC-ROC:", f"{float(metrics.get('auc_roc', auc)):.4f}")
+    row("AUC-ROC:", auc_str)
     row("Sensitivity:", fmt_pct(metrics.get("sensitivity")))
     row("Specificity:", fmt_pct(metrics.get("specificity")))
 
@@ -250,28 +259,93 @@ def run(args: argparse.Namespace) -> int:
     return 0
 
 
+def _clean_pasted_image_input(raw_in: str, parser: argparse.ArgumentParser) -> tuple[str, argparse.Namespace | None]:
+    s = raw_in.strip().strip("`").strip()
+    if not s:
+        return "", None
+
+    # Handle PowerShell call operator '& ' if present
+    if s.startswith("& "):
+        s = s[2:].strip()
+
+    # If it is already an existing file on disk as-is, treat as plain image path
+    unquoted = s.strip('"').strip("'")
+    if Path(unquoted).is_file():
+        return unquoted, None
+
+    # Check if input looks like a pasted command or CLI invocation with flags
+    is_cmd_like = (
+        s.lower().startswith(("python ", "python3 ", "py ", "python.exe ", "diagnose.py ", "diagnose "))
+        or "--" in s
+        or "diagnose.py" in s.lower()
+    )
+
+    if not is_cmd_like:
+        return unquoted, None
+
+    import shlex
+
+    try:
+        raw_tokens = shlex.split(s, posix=False)
+        tokens = [t.strip('"').strip("'") for t in raw_tokens]
+    except Exception:
+        tokens = s.split()
+
+    while tokens and tokens[0].lower() in ("python", "python3", "py", "python.exe"):
+        tokens.pop(0)
+
+    if tokens and (tokens[0].lower().endswith("diagnose.py") or tokens[0].lower() == "diagnose"):
+        tokens.pop(0)
+
+    if not tokens:
+        return unquoted, None
+
+    try:
+        parsed, _ = parser.parse_known_args(tokens)
+        img = parsed.image if getattr(parsed, "image", None) else ""
+        return (img.strip('"').strip("'") if img else unquoted), parsed
+    except Exception:
+        for t in tokens:
+            if not t.startswith("-"):
+                return t.strip('"').strip("'"), None
+        return unquoted, None
+
+
 def prompt_interactive() -> argparse.Namespace:
     from backend.metrics import get_threshold
 
     print()
     print(c("MelanomaAI v2 — Interactive mode", CYAN))
     print()
-    image_in = input("Enter image path: ").strip().strip('"').strip("'")
+    parser = build_parser()
+    raw_image_in = input("Enter image path: ")
+    image_in, pasted_args = _clean_pasted_image_input(raw_image_in, parser)
+
     name_in = input("Enter patient name (optional): ").strip()
     age_in = input("Enter patient age (default 40): ").strip()
+
+    name = name_in
+    if not name and pasted_args and getattr(pasted_args, "patient_name", ""):
+        name = pasted_args.patient_name
+
     age = 40
     if age_in:
         try:
             age = int(age_in)
         except ValueError:
             print(c("Invalid age; using default 40.", YELLOW))
+    elif pasted_args and getattr(pasted_args, "age", 40) != 40:
+        age = pasted_args.age
+
+    no_gradcam = bool(pasted_args.no_gradcam) if pasted_args else False
+    threshold = getattr(pasted_args, "threshold", get_threshold()) if pasted_args else get_threshold()
 
     return argparse.Namespace(
         image=image_in,
         age=age,
-        threshold=get_threshold(),
-        no_gradcam=False,
-        patient_name=name_in,
+        threshold=threshold,
+        no_gradcam=no_gradcam,
+        patient_name=name,
     )
 
 

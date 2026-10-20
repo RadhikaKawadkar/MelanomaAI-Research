@@ -407,14 +407,7 @@ def get_metrics() -> dict:
     m = load_metrics()
     if m:
         return m
-    return {
-        "accuracy": 0.928,
-        "auc_roc": 0.9770,
-        "sensitivity": 0.7951,
-        "specificity": 0.9738,
-        "precision": 0.9127,
-        "f1_score": 0.8498,
-    }
+    return {}
 
 
 def run_prediction(img_path: str, age: int = 40, threshold: float = 0.50) -> dict:
@@ -478,19 +471,33 @@ if "sample_path" not in st.session_state:
 
 # Pre-warm model silently
 get_model()
-metrics = get_metrics()
-acc = float(metrics.get("accuracy", 0.928))
-auc = float(metrics.get("auc_roc", 0.9770))
-sen = float(metrics.get("sensitivity", 0.7951))
-spe = float(metrics.get("specificity", 0.9738))
-f1 = float(metrics.get("f1_score", 0.8498))
-pre = float(metrics.get("precision", 0.9127))
+metrics = get_metrics() or {}
+auc_val = metrics.get("auc_roc") if metrics.get("auc_roc") is not None else metrics.get("roc_auc")
+acc_val = metrics.get("accuracy")
+sen_val = metrics.get("sensitivity")
+spe_val = metrics.get("specificity")
+f1_val = metrics.get("f1_score")
+pre_val = metrics.get("precision")
+
+auc = float(auc_val) if auc_val is not None else None
+acc = float(acc_val) if acc_val is not None else None
+sen = float(sen_val) if sen_val is not None else None
+spe = float(spe_val) if spe_val is not None else None
+f1 = float(f1_val) if f1_val is not None else None
+pre = float(pre_val) if pre_val is not None else None
 gpu = torch.cuda.is_available()
 
-acc_disp = acc * 100 if acc <= 1 else acc
-sen_disp = sen * 100 if sen <= 1 else sen
-spe_disp = spe * 100 if spe <= 1 else spe
-pre_disp = pre * 100 if pre <= 1 else pre
+acc_disp = (acc * 100 if acc <= 1 else acc) if acc is not None else None
+sen_disp = (sen * 100 if sen <= 1 else sen) if sen is not None else None
+spe_disp = (spe * 100 if spe <= 1 else spe) if spe is not None else None
+pre_disp = (pre * 100 if pre <= 1 else pre) if pre is not None else None
+
+acc_str = f"{acc_disp:.2f}%" if acc_disp is not None else "N/A"
+auc_str = f"{auc:.4f}" if auc is not None else "N/A"
+sen_str = f"{sen_disp:.2f}%" if sen_disp is not None else "N/A"
+spe_str = f"{spe_disp:.2f}%" if spe_disp is not None else "N/A"
+f1_str = f"{f1:.4f}" if f1 is not None else "N/A"
+pre_str = f"{pre_disp:.2f}%" if pre_disp is not None else "N/A"
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TOP NAV
@@ -543,32 +550,32 @@ st.markdown(
 <div class="kpi-strip">
   <div class="kpi-item">
     <div class="kpi-key">Accuracy</div>
-    <div class="kpi-val">{acc_disp:.2f}%</div>
+    <div class="kpi-val">{acc_str}</div>
     <div class="kpi-delta" style="color:#64748B">Locked v2</div>
   </div>
   <div class="kpi-item">
     <div class="kpi-key">AUC-ROC</div>
-    <div class="kpi-val">{auc:.4f}</div>
+    <div class="kpi-val">{auc_str}</div>
     <div class="kpi-delta" style="color:#64748B">Locked v2</div>
   </div>
   <div class="kpi-item">
     <div class="kpi-key">Sensitivity</div>
-    <div class="kpi-val">{sen_disp:.2f}%</div>
+    <div class="kpi-val">{sen_str}</div>
     <div class="kpi-delta" style="color:#64748B">Malignant recall</div>
   </div>
   <div class="kpi-item">
     <div class="kpi-key">Specificity</div>
-    <div class="kpi-val">{spe_disp:.2f}%</div>
+    <div class="kpi-val">{spe_str}</div>
     <div class="kpi-delta" style="color:#64748B">Benign clearance</div>
   </div>
   <div class="kpi-item">
     <div class="kpi-key">F1 Score</div>
-    <div class="kpi-val">{f1:.4f}</div>
+    <div class="kpi-val">{f1_str}</div>
     <div class="kpi-delta" style="color:#64748B">Harmonic mean</div>
   </div>
   <div class="kpi-item" style="border-right:none">
     <div class="kpi-key">Precision</div>
-    <div class="kpi-val">{pre_disp:.2f}%</div>
+    <div class="kpi-val">{pre_str}</div>
     <div class="kpi-delta" style="color:#64748B">Positive predictive</div>
   </div>
 </div>
@@ -633,7 +640,7 @@ with tab1:
         img = None
         if uploaded:
             img = Image.open(uploaded).convert("RGB")
-            st.image(img, use_container_width=True)
+            st.image(img, width="stretch")
 
         if False:  # quick-load sample buttons hidden (logic kept for recovery)
             st.markdown(
@@ -900,11 +907,11 @@ with tab1:
         with gc1:
             orig = st.session_state.get("gcam_orig")
             if orig:
-                st.image(orig, use_container_width=True)
+                st.image(orig, width="stretch")
             st.markdown('<div class="img-label">Original Image</div>', unsafe_allow_html=True)
         with gc2:
             if gcam:
-                st.image(gcam, use_container_width=True)
+                st.image(gcam, width="stretch")
                 st.markdown('<div class="img-label">Grad-CAM Heatmap</div>', unsafe_allow_html=True)
             else:
                 st.markdown(
@@ -941,7 +948,7 @@ with tab1:
 
 with tab2:
     st.markdown("<div style='padding:20px 24px'>", unsafe_allow_html=True)
-    st.markdown('<div class="section-label">Performance Overview — v1 vs v2</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-label">Performance Overview — Clean Retraining Holdout</div>', unsafe_allow_html=True)
 
     ev1, ev2, ev3, ev4 = st.columns(4)
     comps = [
@@ -951,11 +958,12 @@ with tab2:
         ("Specificity", 89.90, spe_disp, "%"),
     ]
     for col, (name, v1v, v2v, unit) in zip([ev1, ev2, ev3, ev4], comps):
+        v2v_str = f"{v2v:.2f}{unit}" if v2v is not None else "N/A"
         col.markdown(
             f"""
         <div class="eval-box">
           <div class="eval-lbl">{name}</div>
-          <div class="eval-num">{v2v:.2f}{unit}</div>
+          <div class="eval-num">{v2v_str}</div>
           <div style="font-size:10px;color:#64748B;margin-top:3px;font-family:'IBM Plex Mono',monospace">v1: {v1v:.2f}{unit}</div>
         </div>
         """,
@@ -964,17 +972,34 @@ with tab2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Prefer existing outputs charts if present
-    chart_paths = [
-        ("ROC Curve", ROOT / "outputs" / "roc_curve.png"),
-        ("Confusion Matrix", ROOT / "outputs" / "confusion_matrix.png"),
-        ("Training Curves", ROOT / "outputs" / "training_curves.png"),
+    # Clean retraining and external validation evaluation charts
+    chart_candidates = [
+        ("Clean Holdout ROC Curve", [
+            ROOT / "outputs" / "clean_retraining" / "roc_curve_clean.png",
+            ROOT / "outputs" / "clinical_utility_external" / "roc_curve_test.png",
+            ROOT / "outputs" / "roc_curve.png",
+        ]),
+        ("Calibration Reliability Curve", [
+            ROOT / "outputs" / "clean_retraining" / "calibration_curve_clean.png",
+            ROOT / "outputs" / "clinical_utility_external" / "calibration_curve_test.png",
+        ]),
+        ("Decision Curve Analysis (DCA)", [
+            ROOT / "outputs" / "clean_retraining" / "dca_curve_clean.png",
+            ROOT / "outputs" / "gap8_clinical_utility" / "dca_net_benefit_curves.png",
+            ROOT / "outputs" / "clinical_utility_external" / "decision_curve_analysis_test.png",
+        ]),
+        ("Confusion Matrix (External Test)", [
+            ROOT / "outputs" / "clinical_utility_external" / "confusion_matrix_test.png",
+            ROOT / "outputs" / "confusion_matrix.png",
+        ]),
     ]
-    ccols = st.columns(3)
-    for i, (label, p) in enumerate(chart_paths):
-        with ccols[i]:
-            if p.exists():
-                st.image(str(p), caption=label, use_container_width=True)
+
+    ccols = st.columns(2)
+    for i, (label, candidate_list) in enumerate(chart_candidates):
+        target_path = next((p for p in candidate_list if p.exists()), None)
+        with ccols[i % 2]:
+            if target_path and target_path.exists():
+                st.image(str(target_path), caption=label, width="stretch")
             else:
                 st.markdown(f"<div class='glass' style='padding:18px'>{label} missing</div>", unsafe_allow_html=True)
 
@@ -1024,13 +1049,16 @@ with tab3:
         )
     st.markdown("</div>", unsafe_allow_html=True)
 
+auc_bar_str = f"AUC {auc:.4f}" if auc is not None else "AUC N/A"
+acc_bar_str = f"ACC {acc_disp:.2f}%" if acc_disp is not None else "ACC N/A"
+
 st.markdown(
     f"""
 <div class="disclaimer-bar">
   FOR CLINICAL DECISION SUPPORT ONLY — Not a replacement for professional dermatological diagnosis
   &nbsp;&nbsp;·&nbsp;&nbsp;
   MelanomaAI v2.0 &nbsp;·&nbsp; EfficientNetB3 &nbsp;·&nbsp;
-  AUC {auc:.4f} &nbsp;·&nbsp; ACC {acc_disp:.2f}% &nbsp;·&nbsp;
+  {auc_bar_str} &nbsp;·&nbsp; {acc_bar_str} &nbsp;·&nbsp;
   {'GPU' if gpu else 'CPU'} &nbsp;·&nbsp;
   {datetime.now().strftime('%B %Y')}
 </div>
